@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Contact form</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:24px auto;padding:12px}
+label{display:block;margin-top:10px}
+input,textarea{width:100%;padding:8px;margin-top:4px;box-sizing:border-box}
+button{margin-top:12px;padding:10px 16px}
+.msg{margin-top:12px;padding:10px;border-radius:4px}
+.success{background:#e6ffed;border:1px solid #2ecc71}
+.error{background:#ffecec;border:1px solid #e74c3c}
+</style>
+</head>
+<body>
+<h2>Contact / Requirements</h2>
+
+<form id="contactForm">
+<label>Name
+<input name="name" type="text" required />
+</label>
+
+<label>Email
+<input name="email" type="email" required />
+</label>
+
+<label>Phone
+<input name="phone" type="tel" />
+</label>
+
+<label>Company Name
+<input name="company" type="text" />
+</label>
+
+<label>Requirement
+<input name="requirement" type="text" />
+</label>
+
+<label>Note
+<textarea name="note" rows="4"></textarea>
+</label>
+
+<button type="submit">Submit</button>
+</form>
+
+<div id="message" class="msg" style="display:none"></div>
+
+<script>
+const WEB_APP_URL = 'SCRIPT_WEB_APP_URL'; // ← replace with your Apps Script /exec URL
+
+function toFormUrlEncoded(obj) {
+return Object.keys(obj).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(obj[k])).join('&');
+}
+
+document.getElementById('contactForm').addEventListener('submit', async function (e) {
+e.preventDefault();
+const form = e.target;
+const data = {
+name: form.name.value.trim(),
+email: form.email.value.trim(),
+phone: form.phone.value.trim(),
+company: form.company.value.trim(),
+requirement: form.requirement.value.trim(),
+note: form.note.value.trim()
+};
+
+const msgEl = document.getElementById('message');
+msgEl.style.display = 'none';
+try {
+const resp = await fetch(WEB_APP_URL, {
+method: 'POST',
+headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+body: toFormUrlEncoded(data)
+});
+const json = await resp.json();
+if (json.result === 'success') {
+msgEl.textContent = 'Thanks — submission saved.'; msgEl.className = 'msg success'; msgEl.style.display = 'block';
+form.reset();
+} else {
+msgEl.textContent = 'Submission failed.'; msgEl.className = 'msg error'; msgEl.style.display = 'block';
+}
+} catch (err) {
+msgEl.textContent = 'Error sending form: ' + err.message; msgEl.className = 'msg error'; msgEl.style.display = 'block';
+}
+});
+</script>
+</body>
+</html>
